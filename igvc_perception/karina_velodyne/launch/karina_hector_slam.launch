@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <arg name="geotiff_map_file_path" default="$(find hector_geotiff)/maps"/> 
+
+<!--I don't think these tf's are necessary / they are made in other places (move_base.launch creates base_to_velodyne and mapping_new.launch automatically creates odom_to_base)
+  <node pkg="tf" type="static_transform_publisher" name="odom_to_base" 
+    args="0 0 0 0 0 0 /odom /base_link 100"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="base_to_velodyne" 
+    args="0 0 0 0 0 0 /base_link /velodyne 100"/>
+-->
+
+  <param name="/use_sim_time" value="false"/>
+
+<!--
+  <node pkg="rviz" type="rviz" name="rviz"
+    args="-d $(find hector_slam_launch)/rviz_cfg/mapping_demo.rviz"/>
+-->
+
+<include file="$(find karina_velodyne)/launch/karina_mapping_params.launch"/>
+
+  <include file="$(find hector_geotiff_launch)/launch/geotiff_mapper.launch">
+    <arg name="trajectory_source_frame_name" value="scanmatcher_frame"/>
+    <arg name="map_file_path" value="$(arg geotiff_map_file_path)"/>
+  </include>
+
+</launch>

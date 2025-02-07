@@ -1,0 +1,163 @@
+<!--
+LEFT CAMERA: /dev/v4l/by-path/pci-0000:05:00.3-usb-0:2.2.1:1.0-video-index0
+T:  Bus=01 Lev=03 Prnt=59 Port=00 Cnt=01 Dev#= 68 Spd=480 MxCh= 0
+D:  Ver= 2.00 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs=  1
+P:  Vendor=046d ProdID=0843 Rev=00.13
+S:  Product=Logitech Webcam C930e
+S:  SerialNumber=CF3804DE
+C:  #Ifs= 4 Cfg#= 1 Atr=80 MxPwr=500mA
+I:  If#=0x0 Alt= 0 #EPs= 1 Cls=0e(video) Sub=01 Prot=00 Driver=uvcvideo
+I:  If#=0x1 Alt= 0 #EPs= 0 Cls=0e(video) Sub=02 Prot=00 Driver=uvcvideo
+I:  If#=0x2 Alt= 0 #EPs= 0 Cls=01(audio) Sub=01 Prot=00 Driver=snd-usb-audio
+I:  If#=0x3 Alt= 0 #EPs= 0 Cls=01(audio) Sub=02 Prot=00 Driver=snd-usb-audio
+
+MID CAMERA: /dev/v4l/by-path/pci-0000:05:00.3-usb-0:2.2.3.3:1.0-video-index0
+T:  Bus=01 Lev=04 Prnt=61 Port=02 Cnt=02 Dev#= 69 Spd=480 MxCh= 0
+D:  Ver= 2.00 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs=  1
+P:  Vendor=046d ProdID=0843 Rev=00.13
+S:  Product=Logitech Webcam C930e
+S:  SerialNumber=4FAA04DE
+C:  #Ifs= 4 Cfg#= 1 Atr=80 MxPwr=500mA
+I:  If#=0x0 Alt= 0 #EPs= 1 Cls=0e(video) Sub=01 Prot=00 Driver=uvcvideo
+I:  If#=0x1 Alt= 0 #EPs= 0 Cls=0e(video) Sub=02 Prot=00 Driver=uvcvideo
+I:  If#=0x2 Alt= 0 #EPs= 0 Cls=01(audio) Sub=01 Prot=00 Driver=snd-usb-audio
+I:  If#=0x3 Alt= 4 #EPs= 1 Cls=01(audio) Sub=02 Prot=00 Driver=snd-usb-audio
+
+RIGHT CAMERA: /dev/v4l/by-path/pci-0000:05:00.3-usb-0:2.2.4.1:1.0-video-index0
+T:  Bus=01 Lev=04 Prnt=60 Port=00 Cnt=01 Dev#= 62 Spd=480 MxCh= 0
+D:  Ver= 2.00 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs=  1
+P:  Vendor=046d ProdID=0843 Rev=00.13
+S:  Product=Logitech Webcam C930e
+S:  SerialNumber=01FA04DE
+C:  #Ifs= 4 Cfg#= 1 Atr=80 MxPwr=500mA
+I:  If#=0x0 Alt= 0 #EPs= 1 Cls=0e(video) Sub=01 Prot=00 Driver=uvcvideo
+I:  If#=0x1 Alt= 0 #EPs= 0 Cls=0e(video) Sub=02 Prot=00 Driver=uvcvideo
+I:  If#=0x2 Alt= 0 #EPs= 0 Cls=01(audio) Sub=01 Prot=00 Driver=snd-usb-audio
+I:  If#=0x3 Alt= 0 #EPs= 0 Cls=01(audio) Sub=02 Prot=00 Driver=snd-usb-audio
+
+                z    x     y
+ x    y   z    yaw pitch roll
+-0.20 0.0 1.18 0.0 0.77 0.0
+-0.30 0.15 1.15 1.57 0.77 0.0
+-0.30 -0.15 1.15 -1.57 0.77 0.0
+ 
+[0.92565012, 0.0874997, -0.36812454, 0;
+ 0.3194724, 0.34059358, 0.88427001, 0;
+ 0.20275421, -0.93613023, 0.28731674, 0;
+ 0, 0, 0, 1]
+-->
+
+<launch>
+  <!-- Launch ZED 2 camera (change to 2i if using ZED2i)-->
+  <!-- <include file="$(find zed_wrapper)/launch/zed2i.launch" /> -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_mid_cam_tf" args="-0.26 0.0 1.49 0.07200074 -0.00435671 2.27131868 base_link base_mid_cam_tf"/>
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_left_cam_tf" args="-0.16 0.25 0.0 1.070471 0.57364188 0.49083087 base_mid_cam_tf base_left_cam_tf"/>
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_right_cam_tf" args="-0.16 -0.25 0.0 -1.05643478 -0.72354967 0.45667188 base_mid_cam_tf base_right_cam_tf"/>
+
+    <node name="cam_pub_left" pkg="simple_camera_publisher" type="cam_pub" respawn="true" respawn_delay="10" output="screen">
+        <param name="source" type="string" value="/dev/v4l/by-path/pci-0000:05:00.3-usb-0:2.2.1:1.0-video-index0" />
+        <param name="image_topic" type="string" value="/raw_image_left" />
+    </node>
+    <!-- <node pkg="hsv_thresh" type="static_image_publisher.py" name="static_image_publisher_left" output="screen">
+        <param name="image_path" type="string" value="/home/aasha/karina_ws/src/Karina/igvc_perception/Lane2Laser_Capstone/src/left_test.png"/>
+        <param name="topic_name" type="string" value="/static_image_left"/>
+    </node> -->
+    <node pkg="hsv_thresh" type="hsv.py" name="hsv_left" respawn="true" respawn_delay="10" output="screen">
+        <!-- <param name="image_topic" type="string" value="/static_image_left"/> -->
+        <param name="image_topic" type="string" value="/raw_image_left" />
+        <param name="lane_img_pub" type="string" value="/left_lane_img" />
+    </node>
+    <node pkg="igvc_vision" name="img_to_laser_left"  type="img_to_laser" respawn="true" respawn_delay="10" output="screen">
+        <param name="max_range" type="double" value="3.0" />
+        <param name="start_point" type="string" value="base_link" />
+        <param name="alpha"   type="double" value="144" />
+        <param name="beta"   type="double" value="68.39" />
+        <param name="gamma"   type="double" value="108.0" />
+        <param name="pixel_to_meter"   type="double" value="97.0" />
+        <param name="dist"   type="double" value="420.0" />
+        <param name="home_positionX"   type="int" value="320" />
+        <param name="home_positionY"   type="int" value="480" />
+        <param name="angle_min"   type="double" value="0.0" />
+        <param name="angle_max"   type="double" value="3.14" />
+        
+        <param name="cam_pos" type="int" value="0" />
+        <param name="laser_scan_topic" type="string" value="lane_scan_left" />
+        <param name="camera_topic_mono" type="string" value="/left_lane_img" />
+        <param name="camera_topic_rgb" type="string" value="/rgb_image" /> 
+        <param name="scan_topic"   type="string" value="/unused" />
+        <param name="camera_frame"   type="string" value="base_left_cam_tf" />
+        <remap from="/img_to_laser_left/lane_scan"   to="/img_to_laser/lane_scan_left" />
+    </node>
+
+    <node name="cam_pub_right" pkg="simple_camera_publisher" type="cam_pub" respawn="true" respawn_delay="10" output="screen">
+        <param name="source" type="string" value="/dev/v4l/by-path/pci-0000:05:00.3-usb-0:2.2.3.1:1.0-video-index0" />
+        <param name="image_topic" type="string" value="/raw_image_right" />
+    </node>
+    <!-- <node pkg="hsv_thresh" type="static_image_publisher.py" name="static_image_publisher_right" output="screen">
+        <param name="image_path" type="string" value="/home/aasha/karina_ws/src/Karina/igvc_perception/Lane2Laser_Capstone/src/right_test.jpg"/>
+        <param name="topic_name" type="string" value="/static_image_right"/>
+    </node> -->
+    <node pkg="hsv_thresh" type="hsv.py" name="hsv_right" respawn="true" respawn_delay="10" output="screen">
+        <!-- <param name="image_topic" type="string" value="/static_image_right"/> -->
+        <param name="image_topic" type="string" value="/raw_image_right" />
+        <param name="lane_img_pub" type="string" value="/right_lane_img" />
+    </node>
+    <node pkg="igvc_vision" name="img_to_laser_right"  type="img_to_laser" respawn="true" respawn_delay="10" output="screen">
+        <param name="max_range" type="double" value="3.0" />
+        <param name="start_point" type="string" value="base_link" />
+        <param name="alpha"   type="double" value="90.0" />
+        <param name="beta"   type="double" value="135.0" />
+        <param name="gamma"   type="double" value="90.0" />
+        <param name="pixel_to_meter"   type="double" value="166.0" />
+        <param name="dist"   type="double" value="420.0" />
+        <param name="home_positionX"   type="int" value="320" />
+        <param name="home_positionY"   type="int" value="530" />
+        <param name="angle_min"   type="double" value="-3.14" />
+        <param name="angle_max"   type="double" value="0.0" />
+        
+        <param name="cam_pos" type="int" value="1" />
+        <param name="laser_scan_topic" type="string" value="lane_scan_right" />
+        <param name="camera_topic_mono" type="string" value="/right_lane_img" />
+        <param name="camera_topic_rgb" type="string" value="/rgb_image" /> 
+        <param name="scan_topic"   type="string" value="/unused" />
+        <param name="camera_frame"   type="string" value="base_right_cam_tf" />
+        <remap from="/img_to_laser_right/lane_scan"   to="/img_to_laser/lane_scan_right" />
+    </node>
+
+    <node name="cam_pub_mid" pkg="simple_camera_publisher" type="cam_pub" respawn="true" respawn_delay="10" output="screen">
+        <param name="source" type="string" value="/dev/v4l/by-path/pci-0000:05:00.3-usb-0:2.2.3.2:1.0-video-index0" />
+        <param name="image_topic" type="string" value="/raw_image_mid" />
+    </node>
+    <!-- <node pkg="hsv_thresh" type="static_image_publisher.py" name="static_image_publisher_mid" output="screen">
+        <param name="image_path" type="string" value="/home/aasha/karina_ws/src/Karina/igvc_perception/Lane2Laser_Capstone/src/mid_test.jpg"/>
+        <param name="topic_name" type="string" value="/static_image_mid"/>
+    </node> -->
+    <node pkg="hsv_thresh" type="hsv.py" name="hsv_mid" respawn="true" respawn_delay="10" output="screen">
+        <!-- <param name="image_topic" type="string" value="/static_image_mid"/> -->
+        <param name="image_topic" type="string" value="/raw_image_mid" />
+        <param name="lane_img_pub" type="string" value="/mid_lane_img" />
+    </node> 
+    <node pkg="igvc_vision" name="img_to_laser_mid"  type="img_to_laser" respawn="true" respawn_delay="10" output="screen">
+        <param name="max_range" type="double" value="1000.0" />
+        <param name="start_point" type="string" value="base_link" />
+        <param name="alpha"   type="double" value="132.46" />
+        <param name="beta"   type="double" value="90.35" />
+        <param name="gamma"   type="double" value="93.90" />
+        <param name="pixel_to_meter"   type="double" value="202.11" />
+        <param name="dist"   type="double" value="420.0" />
+        <param name="home_positionX"   type="int" value="320" />
+        <param name="home_positionY"   type="int" value="530" />
+        <param name="angle_min"   type="double" value="-1.57" />
+        <param name="angle_max"   type="double" value="1.57" />
+        
+        <param name="cam_pos" type="int" value="2" />
+        <param name="laser_scan_topic" type="string" value="lane_scan_mid" />
+        <param name="camera_topic_mono" type="string" value="/mid_lane_img" />
+        <param name="camera_topic_rgb" type="string" value="/rgb_image" /> 
+        <param name="scan_topic"   type="string" value="/unused" />
+        <param name="camera_frame"   type="string" value="base_mid_cam_tf" />
+        <remap from="/img_to_laser_mid/lane_scan"   to="/img_to_laser/lane_scan_mid" />
+    </node>
+    <!-- <node pkg="igvc_vision" type="opto_param_publisher.py" name="opto_params_mid" output="screen"/> -->
+
+</launch>
